@@ -23,6 +23,7 @@ class ASTToZ3Compiler(ast.NodeVisitor):
 
     def __init__(self) -> None:
         self.func_name: str = ""
+        self.global_var_counts: Dict[str, int] = {}
         self.var_versions: Dict[str, int] = {}
         self.z3_symbols: Dict[str, z3.ArithRef] = {}
         self.input_vars: Dict[str, z3.ArithRef] = {}
@@ -34,9 +35,10 @@ class ASTToZ3Compiler(ast.NodeVisitor):
         self.return_exprs: List[Tuple[z3.BoolRef, z3.ArithRef]] = []
 
     def _new_ssa_var(self, name: str) -> z3.ArithRef:
-        # Increment version suffix (x_0, x_1, ...) so imperative reassignments
-        # turn into pure mathematical equalities in Z3.
-        version = self.var_versions.get(name, -1) + 1
+        # Increment a monotonic global counter (x_0, x_1, ...) so assignments in
+        # sibling if/else branches never collide on the same Z3 symbol.
+        version = self.global_var_counts.get(name, -1) + 1
+        self.global_var_counts[name] = version
         self.var_versions[name] = version
         ssa_name = f"{name}_{version}"
         # Use unbounded z3.Int rather than BitVec since Python integers have arbitrary precision.
@@ -118,8 +120,8 @@ class ASTToZ3Compiler(ast.NodeVisitor):
         self.path_conds.pop()
         false_versions = dict(self.var_versions)
 
-        # Need phi-style z3.If merges here so variables modified in only one branch
-        # keep their prior SSA version on the opposite path.
+        # Phi-style z3.If merges so variables modified across branches keep
+        # distinct SSA versions on each execution path.
         all_vars = set(true_versions.keys()) | set(false_versions.keys())
         for var in all_vars:
             t_ver = true_versions.get(var)
