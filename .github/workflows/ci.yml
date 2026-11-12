@@ -24,7 +24,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Z3 formal verification tests
-        run: pytest -v
+        run: python -m pytest -v
 
       - name: Run benchmark suite
         run: python benchmarks/run_benchmarks.py
