@@ -1,3 +1,4 @@
+# tested against leverage-cap invariants in Z3
 """
 Quantitative position-sizing risk guards tested with Z3.
 Checks whether scaled alpha signals can breach portfolio leverage limits.
