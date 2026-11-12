@@ -107,3 +107,18 @@ With preconditions `balance >= 0, amount > 0, fee >= 0` and safety invariant `re
 - **Arbitrary-Precision Integers:** Variables are modeled with `z3.Int` instead of fixed-width bitvectors (`z3.BitVec`) so Python integers do not falsely wrap around at 32 or 64 bits.
 - **Chained Comparisons:** Python parses expressions like `0 <= x < n` as a single `ast.Compare` node with multiple operators, so `compile_bool` splits them into pairwise Z3 conjunctions.
 - **Current Scope:** Translating arbitrary Python semantics into first-order logic is undecidable in general. The compiler intentionally scopes to a decidable subset (integer arithmetic `+`, `-`, `*`, `//`, `%`, chained comparisons, boolean logic, SSA assignments, `if/else` branches, and `raise` guards). Planned extensions include bounded loop unrolling (`for`/`while` up to $k$ steps) and Z3 `Array` theory for list slice verification.
+## Benchmark Coverage
+
+The benchmark suite (`benchmarks/run_benchmarks.py`) evaluates 7 verification scenarios across integer arithmetic, buffer bounds, and portfolio leverage limits:
+
+| Test Case | Expected Verdict |
+| :--- | :--- |
+| Unguarded Financial Transfer | `VULNERABLE` |
+| Guarded Financial Transfer | `PROVEN_SAFE` |
+| Off-by-One Buffer Indexing | `VULNERABLE` |
+| API Rate-Limiter Quota Underflow | `VULNERABLE` |
+| Unguarded Coupon Deduction | `VULNERABLE` |
+| Unbounded Alpha Leverage Exposure | `VULNERABLE` |
+| Guarded Alpha Leverage Exposure | `PROVEN_SAFE` |
+
+- **Tested Environment:** Verified on macOS (Python 3.13, Z3 SMT Solver).
