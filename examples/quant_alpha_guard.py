@@ -1,13 +1,11 @@
-# tested against leverage-cap invariants in Z3
 """
 Quantitative position-sizing risk guards tested with Z3.
-Checks whether scaled alpha signals can breach portfolio leverage limits.
+Checks whether net alpha-adjusted exposure can breach portfolio risk limits.
 """
 
 UNSAFE_POSITION_SIZER = """
-def compute_position_size(capital, signal_bps, max_leverage):
-    # Scale capital by basis-point alpha signal (10000 bps = 1x notional)
-    exposure = (capital * signal_bps) // 10000
+def compute_net_exposure(base_position, alpha_delta, max_exposure):
+    exposure = base_position + alpha_delta
     if exposure < 0:
         abs_exposure = -exposure
     else:
@@ -16,13 +14,13 @@ def compute_position_size(capital, signal_bps, max_leverage):
 """
 
 SAFE_POSITION_SIZER = """
-def compute_position_size(capital, signal_bps, max_leverage):
-    exposure = (capital * signal_bps) // 10000
+def compute_net_exposure(base_position, alpha_delta, max_exposure):
+    exposure = base_position + alpha_delta
     if exposure < 0:
         abs_exposure = -exposure
     else:
         abs_exposure = exposure
-    if abs_exposure > capital * max_leverage:
-        raise ValueError("Position exposure exceeds maximum leverage cap")
+    if abs_exposure > max_exposure:
+        raise ValueError("Position exposure exceeds maximum risk limit")
     return abs_exposure
 """
