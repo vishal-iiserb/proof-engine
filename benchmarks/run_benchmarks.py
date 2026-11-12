@@ -51,21 +51,20 @@ BENCHMARK_SUITE = [
         "inv": ["return_val >= 0"],
         "expected": "VULNERABLE",
     },
-    {
-        "name": "Unbounded Alpha Leverage Exposure",
+  {
+        "name": "Unbounded Alpha Exposure Limit",
         "code": UNSAFE_POSITION_SIZER,
-        "pre": ["capital > 0", "max_leverage >= 1"],
-        "inv": ["return_val >= 0", "return_val <= capital * max_leverage"],
+        "pre": ["max_exposure >= 1"],
+        "inv": ["return_val >= 0", "return_val <= max_exposure"],
         "expected": "VULNERABLE",
     },
     {
-        "name": "Guarded Alpha Leverage Exposure",
+        "name": "Guarded Alpha Exposure Limit",
         "code": SAFE_POSITION_SIZER,
-        "pre": ["capital > 0", "max_leverage >= 1"],
-        "inv": ["return_val >= 0", "return_val <= capital * max_leverage"],
+        "pre": ["max_exposure >= 1"],
+        "inv": ["return_val >= 0", "return_val <= max_exposure"],
         "expected": "PROVEN_SAFE",
     },
-]
 
 
 def main() -> None:
