@@ -55,23 +55,22 @@ def test_detects_coupon_underflow():
 def test_detects_alpha_leverage_breach():
     res = verify_function(
         code_str=UNSAFE_POSITION_SIZER,
-        preconditions=["capital > 0", "max_leverage >= 1"],
-        safety_invariants=["return_val >= 0", "return_val <= capital * max_leverage"],
+        preconditions=["max_exposure >= 1"],
+        safety_invariants=["return_val >= 0", "return_val <= max_exposure"],
     )
     assert res.status == "VULNERABLE"
     assert res.counterexample is not None
-    assert res.counterexample["return_val"] > res.counterexample["capital"] * res.counterexample["max_leverage"]
+    assert res.counterexample["return_val"] > res.counterexample["max_exposure"]
 
 
 def test_proves_guarded_alpha_position_sizer_safe():
     res = verify_function(
         code_str=SAFE_POSITION_SIZER,
-        preconditions=["capital > 0", "max_leverage >= 1"],
-        safety_invariants=["return_val >= 0", "return_val <= capital * max_leverage"],
+        preconditions=["max_exposure >= 1"],
+        safety_invariants=["return_val >= 0", "return_val <= max_exposure"],
     )
     assert res.status == "PROVEN_SAFE"
     assert res.counterexample is None
-
 
 def test_cegis_loop_repairs_and_verifies():
     run = run_verification_loop(
