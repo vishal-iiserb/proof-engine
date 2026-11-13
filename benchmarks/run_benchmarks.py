@@ -66,7 +66,7 @@ BENCHMARK_SUITE = [
         "expected": "PROVEN_SAFE",
     },
 
-
+]
 def main() -> None:
     print(f"{'Test Case':<36} | {'Expected':<12} | {'Actual':<12} | {'Time (ms)':<9}")
     print("-" * 78)
